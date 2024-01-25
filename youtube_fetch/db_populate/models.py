@@ -16,6 +16,9 @@ class VideoData(models.Model):
     creation_date = models.DateTimeField(auto_created=True,  auto_now_add=True)
 
     class Meta:
+        ordering = [
+            '-published_time',
+        ]
         indexes = [
             models.Index(fields=['published_time']),
         ]

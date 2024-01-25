@@ -4,9 +4,49 @@ services:
   backend:
     build:
       context: .
-      dockerfile: ./Dockerfile
-    command: python manage.py runserver 0.0.0.0:8000
+      dockerfile: youtube_fetch/Dockerfile
+    command: bash -c "python manage.py migrate && python manage.py runserver 0.0.0.0:8000"
     volumes:
-      - ./:/usr/src/app
+      - ./youtube_fetch:/usr/src/app
     ports:
       - "8000:8000"
+    environment:
+      - SECRET_KEY='django-insecure-i1ln@7mfe9%xvf=dohr8m7@1_je11!z)x1q+o*s!+u)w^txj!$'
+
+  redis:
+    image: "redis:alpine"
+    expose:
+      - 6379
+
+  celery:
+    build:
+      context: .
+      dockerfile: youtube_fetch/Dockerfile
+    command: celery -A youtube_fetch worker -l INFO
+    volumes:
+      - ./youtube_fetch:/usr/src/app/
+    environment:
+      - DEBUG=1
+    depends_on:
+      - backend
+      - redis
+
+  celery-beat:
+    build:
+      context: .
+      dockerfile: youtube_fetch/Dockerfile
+    command: celery -A youtube_fetch beat --loglevel=info
+    volumes:
+      - ./youtube_fetch:/usr/src/app/
+
+    environment:
+      - DEBUG=1
+
+  frontend:
+    build:
+      context: .
+      dockerfile: ./frontend/Dockerfile
+    volumes:
+      - ./frontend:/usr/src/app
+    ports:
+      - "3000:3000"

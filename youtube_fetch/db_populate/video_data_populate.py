@@ -7,6 +7,7 @@ import json
 from django.core.exceptions import MultipleObjectsReturned
 from .models import APIKeys, VideoData
 from .serializers import VideoDataSerializer
+import logging
 
 os.environ.setdefault("DJANGO_SETTINGS_MODULE", "youtube_fetch.settings")
 django.setup()
@@ -17,6 +18,7 @@ def populate_db():
     """
     Celery task to populate db every minute
     """
+    logging.info("Starting population")
     api_key = APIKeys.objects.all()
     # Added three API keys whichever will work will store data other wise it will throw daily limit reached error
     for api in api_key:
@@ -26,9 +28,9 @@ def populate_db():
 
         response = requests.get(url)
         if response.status_code > 399:
-            print("Api reached daily limit", response.status_code)
+            logging.info("Api reached daily limit", response.status_code)
             continue
-        print(response.status_code)
+        logging.info(response.status_code)
         json_data = json.loads(response.text)["items"]
         for data in json_data:
             data_to_insert = {
@@ -44,10 +46,10 @@ def populate_db():
 
             try:
                 vid_data = VideoData.objects.get(video_id=data.get("id")["videoId"])
-                # print('Data already present')
+                logging.info('Data already present')
             except MultipleObjectsReturned:
                 pass
-                # print('Data already present')
+                # logging.info('Data already present')
             except:
                 serializer = VideoDataSerializer(data=data_to_insert)
                 # Validate the data
@@ -55,6 +57,6 @@ def populate_db():
                     # Save the validated data to the database
                     serializer.save(creation_date=datetime.now())
                 else:
-                    # Print validation errors if any
-                    print(serializer.errors)
+                    # logging.info validation errors if any
+                    logging.info(serializer.errors)
         break
