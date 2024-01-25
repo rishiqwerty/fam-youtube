@@ -8,5 +8,8 @@ from rest_framework import filters
 class VideoDataView(generics.ListAPIView):
     queryset = VideoData.objects.all()
     serializer_class = VideoDataSerializer
-    filter_backends = [filters.SearchFilter]
+    filter_backends = [filters.SearchFilter, filters.OrderingFilter]
     search_fields = ["video_title", "description"]
+    ordering_fields = [
+        "published_time",
+    ]

@@ -12,6 +12,7 @@ services:
       - "8000:8000"
     environment:
       - SECRET_KEY='django-insecure-i1ln@7mfe9%xvf=dohr8m7@1_je11!z)x1q+o*s!+u)w^txj!$'
+      - DEBUG=True
 
   redis:
     image: "redis:latest"

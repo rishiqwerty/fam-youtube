@@ -10,18 +10,20 @@ function VideoDetails() {
   const [pageCount, setPageCount] = useState(0);
   const [currentPage, setCurrentPage] = useState(1);
   const [searchTerm, setSearchTerm] = useState('');
+  const [sort, setSort] = useState('-published_time');
+
   const a = new Date();
   const [dateFilter, setDate] = useState(
     {
-      start:a.getFullYear()+'-'+a.getMonth()+1+'-'+'01',
-      end:a.getFullYear()+'-'+a.getMonth()+1+'-'+a.getDate(),
+      start: a.getFullYear() + '-' + a.getMonth() + 1 + '-' + '01',
+      end: a.getFullYear() + '-' + a.getMonth() + 1 + '-' + a.getDate(),
     }
   );
 
   useEffect(() => {
     console.log("Heres")
     fetchData(currentPage);
-  }, [currentPage, dateFilter]);
+  }, [currentPage, dateFilter, sort]);
 
   const fetchData = async (page) => {
     setIsLoading(true);
@@ -29,11 +31,11 @@ function VideoDetails() {
 
     try {
       const response = await axios.get(
-        `http://localhost:8000/api/video-data/?${searchTerm?'search='+searchTerm+'&':''}page=${page}`,
-        );
-        if (response) {
-          setData(response.data.results);
-          console.log("Here!!!", response.data.results, data)
+        `/api/video-data/?${searchTerm ? 'search=' + searchTerm + '&' : ''}${sort ? 'ordering=' + sort + '&' : ''}page=${page}`,
+      );
+      if (response) {
+        setData(response.data.results);
+        console.log("Here!!!", response.data.results, data)
       }
       setPageCount(Math.ceil(response.data.count / 5)); // Assuming your API provides total count
 
@@ -63,46 +65,53 @@ function VideoDetails() {
 
       <div className="container mt-4">
         <form onSubmit={handleSearchSubmit} className="mb-4">
-            <div className="row">
-              <div className="col-md-8 mb-3">
-                <input
-                  type="text"
-                  placeholder="Search..."
-                  className="form-control"
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                />
-              </div>
-              <div className="col-md-4">
-                <button type="submit" className="btn btn-primary">
-                  Search
-                </button>
-              </div>
-            </div>
-          </form>
           <div className="row">
-            {data.map((item) => (
-              <div key={item.id} className="row-md-6 mb-4">
-                <a href={item.urls} className="text-decoration-none text-dark">
-                  <div className="card">
-                    <div className="row g-0">
-                      <div className="col-md-6">
-                        <img src={item.thumbnails.default.url} alt="Thumbnail" className="img-fluid" />
-                      </div>
-                      <div className="col-md-6">
-                        <div className="card-body">
-                          <h5 className="card-title">{item.video_title}</h5>
-                          <p className="card-text">{item.description}</p>
-                          <p className="card-text text-muted">{item.channel_name}</p>
-                          <p className="card-text text-muted">{item.published_time}</p>
-                        </div>
+            <div className="col-md-8 mb-3">
+              <input
+                type="text"
+                placeholder="Search..."
+                className="form-control"
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+              />
+            </div>
+            <div className="col-md-4">
+              <button type="submit" className="btn btn-primary">
+                Search
+              </button>
+            </div>
+          </div>
+        </form>
+        <div className="form-floating col-md-4 mb-3">
+          <select className='form-select' id='floatingSelect' value={sort} onChange={(e) => setSort(e.target.value)}>
+            <option value="-published_time">{"Newest First"}</option>
+            <option value="published_time">{"Oldest"}</option>
+          </select>
+          <label for="floatingSelect">Sort</label>
+        </div>
+        <div className="row">
+          {data.map((item) => (
+            <div key={item.id} className="row-md-6 mb-4">
+              <a href={item.urls} className="text-decoration-none text-dark">
+                <div className="card">
+                  <div className="row g-0">
+                    <div className="col-md-6">
+                      <img src={item.thumbnails.default.url} alt="Thumbnail" className="img-fluid" />
+                    </div>
+                    <div className="col-md-6">
+                      <div className="card-body">
+                        <h5 className="card-title">{item.video_title}</h5>
+                        <p className="card-text">{item.description}</p>
+                        <p className="card-text text-muted">{item.channel_name}</p>
+                        <p className="card-text text-muted">{item.published_time}</p>
                       </div>
                     </div>
                   </div>
-                </a>
-              </div>
-            ))}
-          </div>
+                </div>
+              </a>
+            </div>
+          ))}
+        </div>
       </div>
 
 
