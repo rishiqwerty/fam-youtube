@@ -94,6 +94,7 @@ function VideoDetails() {
                           <h5 className="card-title">{item.video_title}</h5>
                           <p className="card-text">{item.description}</p>
                           <p className="card-text text-muted">{item.channel_name}</p>
+                          <p className="card-text text-muted">{item.published_time}</p>
                         </div>
                       </div>
                     </div>
